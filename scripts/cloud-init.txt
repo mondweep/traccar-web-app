@@ -1,0 +1,3 @@
+#cloud-config
+runcmd:
+  - curl -s https://raw.githubusercontent.com/mondweep/traccar-web-app/main/setup-azure-backend.sh | bash
