@@ -1,24 +1,39 @@
 # Traccar GPS Tracking Platform - Monorepo
 
-This is a unified repository containing both the **Traccar Backend Server** and **Traccar Web Interface** for creating a complete GPS tracking demonstration with dashcam integration.
+This is a unified repository containing both the **Traccar Backend Server** and **Traccar Web Interface**, customized for creating a complete GPS tracking demonstration with dashcam integration.
 
 ## Repository Structure
 
 ```
-├── web/          # Traccar Web Interface (React + Vite)
-├── server/       # Traccar Backend Server (Java)
-├── README.md     # This file
+├── web/                  # Traccar Web Interface (React + Vite) - Deployed to Netlify
+├── server/               # Traccar Backend Server (Java) - Deployed to Azure VM
+├── TEAM_ONBOARDING.md    # [New] Team guide for architecture and connecting devices
+├── DEPLOYMENT_GUIDE.md   # [New] Full guide for deploying to Azure/Netlify
+├── setup-azure-backend.sh # [New] Automated script to provision the Azure VM
+├── README.md             # This file
 └── ...
 ```
 
-## Overview
+## Project Customizations
 
-**Traccar** is an open-source GPS tracking platform. This monorepo integrates:
+We have customized the standard Traccar platform for our specific deployment needs:
 
-- **Web Interface** (`/web`) - Modern React-based web dashboard
-- **Backend Server** (`/server`) - Java-based GPS tracking server
+### 1. Hybrid Deployment Architecture
+*   **Split Frontend/Backend:** Unlike the standard monolithic deployment, we deploy the Frontend to **Netlify** for performance and correct caching, while the Backend runs on **Azure Linux VMs** for raw TCP socket handling.
+*   **API Proxying:** The Netlify frontend proxies API requests (`/api/*`) securely to the Azure backend IP.
 
-Together, these provide a complete platform for GPS tracking, vehicle monitoring, and dashcam integration.
+### 2. Streamax Dashcam Integration
+*   **Protocol Support:** We explicitly enable and configure the `Streamax` protocol (Port 23913) for dashcam integration.
+*   **Custom Decoder:** Modified `StreamaxProtocolDecoder.java` to support video event handling and specific device telemetry.
+
+### 3. Automated Provisioning
+*   **Infrastructure as Code:** Included `setup-azure-backend.sh` to automate the provisioning of the Ubuntu server, including Java 17 installation, firewall configuration (UFW/Azure NSG), and systemd service creation.
+
+## Key Documents
+
+*   [**Team Onboarding & Device Connection**](./TEAM_ONBOARDING.md) - **Start Here.** How to connect phones and dashcams to the platform. Includes the full architecture diagram.
+*   [**Deployment Guide**](./DEPLOYMENT_GUIDE.md) - Step-by-step instructions for deploying to production (Netlify + Azure).
+*   [**Azure Setup Script**](./setup-azure-backend.sh) - Shell script used to bootstrap the backend server.
 
 ## Quick Start
 
@@ -29,11 +44,9 @@ Navigate to the web directory and install dependencies:
 ```bash
 cd web
 npm install
-npm run dev  # For development
-npm run build  # For production
+npm run dev
+# The dev server will proxy requests to the Azure Backend IP defined in vite.config.js
 ```
-
-For detailed build instructions, see [web/README.md](./web/README.md) or visit [traccar.org/build-web-app](https://www.traccar.org/build-web-app/)
 
 ### Backend Server
 
@@ -44,8 +57,6 @@ cd server
 ./gradlew build
 ```
 
-For detailed instructions, see [server/README.md](./server/README.md)
-
 ## Dashcam Demonstration
 
 This integrated setup enables a comprehensive dashcam demonstration:
@@ -53,13 +64,6 @@ This integrated setup enables a comprehensive dashcam demonstration:
 1. **GPS Server** - Tracks vehicle location and telemetry data
 2. **Web Dashboard** - Displays real-time vehicle positions and dashcam integration
 3. **Data Integration** - Connects GPS tracking with dashcam video streams
-
-### Setup Steps
-
-1. Start the backend server from the `/server` directory
-2. Configure the web interface to connect to your server
-3. Add GPS devices (dashcams or GPS trackers)
-4. View real-time tracking in the web dashboard
 
 ## Documentation
 
@@ -77,10 +81,11 @@ This integrated setup enables a comprehensive dashcam demonstration:
 - Vite (build tool)
 
 ### Backend
-- Java
+- Java 17
 - Gradle (build system)
 - RESTful API
 - WebSocket for real-time updates
+- H2 Database (File-based for simple portability)
 
 ## Team
 
@@ -92,21 +97,3 @@ This integrated setup enables a comprehensive dashcam demonstration:
 ## License
 
 Apache License, Version 2.0
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-## Contributing
-
-For contributions, features, or issues:
-- Check [Traccar GitHub](https://github.com/traccar/traccar)
-- Check [Traccar Web GitHub](https://github.com/traccar/traccar-web)
