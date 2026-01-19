@@ -34,7 +34,7 @@ We have customized the standard Traccar platform for our specific deployment nee
 *   **Ports:** Active and listening on TCP Port 5055.
 
 ### 5. Automated Provisioning
-*   **Infrastructure as Code:** Included `setup-azure-backend.sh` to automate the provisioning of the Ubuntu server, including Java 17 installation, firewall configuration (UFW/Azure NSG), and systemd service creation.
+*   **Infrastructure as Code:** Included `scripts/setup-azure-backend.sh` to automate the provisioning of the Ubuntu server, including Java 17 installation, firewall configuration (UFW/Azure NSG), and systemd service creation.
 
 ## Device Connection Quick Reference
 
