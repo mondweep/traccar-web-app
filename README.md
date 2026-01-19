@@ -7,55 +7,56 @@ This is a unified repository containing both the **Traccar Backend Server** and 
 ```
 ├── web/                  # Traccar Web Interface (React + Vite) - Deployed to Netlify
 ├── server/               # Traccar Backend Server (Java) - Deployed to Azure VM
-├── README.md             # This file
-├── TEAM_ONBOARDING.md    # Guide for connecting devices & architecture
-└── ... (See Documentation Index below)
+├── docs/                 # Project Documentation & Guides
+├── setup-azure-backend.sh # Automated script to provision the Azure VM
+└── README.md             # This file
 ```
 
-## Project Customizations
+## Project Customizations & Features
 
-We have customized the standard Traccar platform for our specific deployment needs:
+We have customized the standard Traccar platform for our specific deployment needs and added specific capabilities:
 
 ### 1. Hybrid Deployment Architecture
 *   **Split Frontend/Backend:** Unlike the standard monolithic deployment, we deploy the Frontend to **Netlify** for performance and correct caching, while the Backend runs on **Azure Linux VMs** for raw TCP socket handling.
 *   **API Proxying:** The Netlify frontend proxies API requests (`/api/*`) securely to the Azure backend IP.
 
-### 2. Streamax Dashcam Integration
+### 2. Streamax Dashcam Integration (Active)
 *   **Protocol Support:** We explicitly enable and configure the `Streamax` protocol (Port 23913) for dashcam integration.
 *   **Custom Decoder:** Modified `StreamaxProtocolDecoder.java` to support video event handling and specific device telemetry.
+*   **Visualization:** Custom dashboard elements to display video status and events.
 
-### 3. Automated Provisioning
+### 3. Teltonika Fleet Support (Active)
+*   **Protocol Support:** Full binary protocol support for Teltonika FMB/FMC/FMM series devices.
+*   **Ports:** Active and listening on TCP Port 5027.
+
+### 4. Personal Tracking (Active)
+*   **Mobile App Support:** Android/iOS "Traccar Client" app support enabled.
+*   **Ports:** Active and listening on TCP Port 5055.
+
+### 5. Automated Provisioning
 *   **Infrastructure as Code:** Included `setup-azure-backend.sh` to automate the provisioning of the Ubuntu server, including Java 17 installation, firewall configuration (UFW/Azure NSG), and systemd service creation.
 
-## Device Capabilities & Port Mapping
+## Device Connection Quick Reference
 
-Our server supports a wide range of devices. Standard ports must be opened on the Azure Firewall if not already active.
-
-| Device Manufacturer | Protocol | Default Port | Status |
+| Device / App | Protocol | Port | Connection Host |
 | :--- | :--- | :--- | :--- |
-| **Streamax** | `streamax` | **23913** | **ACTIVE** (Open in Firewall) |
-| **Traccar Client** | `osmand` | **5055** | **ACTIVE** (Open in Firewall) |
-| **Teltonika** | `teltonika` | **5027** | **Supported** (Requires Port Open) |
-
-> [!NOTE]
-> **Teltonika Devices:** The platform includes full native support for the entire Teltonika fleet (FMB, FMC, FMM series) via the binary TCP protocol. If you plan to deploy Teltonika units, request port `5027` to be opened.
+| **Streamax Dashcam** | `streamax` | **23913** | `20.108.17.147` |
+| **Traccar Client (Phone)** | `osmand` | **5055** | `20.108.17.147` |
+| **Teltonika Tracker** | `teltonika` | **5027** | `20.108.17.147` |
 
 ## Documentation Index
 
-We have extensive documentation covering different aspects of the system:
+All detailed guides are located in the [`docs/`](./docs/) directory.
 
 ### 🚀 Getting Started
-*   [**Team Onboarding**](./TEAM_ONBOARDING.md) - **Start Here.** Connection details, ports, and high-level architecture.
-*   [**Deployment Guide**](./DEPLOYMENT_GUIDE.md) - Production deployment manual for Netlify and Azure.
+*   [**Team Onboarding**](./docs/TEAM_ONBOARDING.md) - **Start Here.** Connection details, ports, and high-level architecture diagram.
+*   [**Deployment Guide**](./docs/DEPLOYMENT_GUIDE.md) - Complete manual for deploying the frontend to Netlify and backend to Azure.
 
 ### 🎥 Dashcam Integration
-*   [**Dashcam Integration Overview**](./DASHCAM_INTEGRATION.md) - Detailed breakdown of the Streamax integration logic.
-*   [**Dashcam Implementation Summary**](./DASHCAM_IMPLEMENTATION_SUMMARY.md) - Technical summary of the implemented Java/React code.
-*   [**Dashcam Setup**](./DASHCAM_SETUP.md) - Specific configuration steps for the Application Processor and devices.
-*   [**Visualization Guide**](./VISUALIZATION_GUIDE.md) - Guide to understanding the specific visual indicators in the UI.
-
-### 🛠 Automation
-*   [**Azure Setup Script**](./setup-azure-backend.sh) - Shell script used to bootstrap the backend server.
+*   [**Dashcam Integration Overview**](./docs/DASHCAM_INTEGRATION.md) - Detailed breakdown of the Streamax integration logic and video flow.
+*   [**Dashcam Implementation Summary**](./docs/DASHCAM_IMPLEMENTATION_SUMMARY.md) - Technical summary of the implemented Java/React code changes.
+*   [**Dashcam Setup**](./docs/DASHCAM_SETUP.md) - Specific configuration steps for the Application Processor.
+*   [**Visualization Guide**](./docs/VISUALIZATION_GUIDE.md) - Explains the custom visual indicators (icons, video status) in the UI.
 
 ## Quick Start
 
