@@ -55,7 +55,7 @@ public class StreamaxProtocolDecoder extends BaseProtocolDecoder {
     }
 
     @Override
-    protected Object decode(ChannelHandlerContext ctx, Channel channel, Object msg) throws Exception {
+    protected Object decode(Channel channel, java.net.SocketAddress remoteAddress, Object msg) throws Exception {
         ByteBuf buf = (ByteBuf) msg;
         String data = buf.toString(StandardCharsets.UTF_8);
 
@@ -82,7 +82,7 @@ public class StreamaxProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Get or create device session
-        DeviceSession deviceSession = getDeviceSession(ctx, channel, deviceId);
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
         if (deviceSession == null) {
             return null;
         }
