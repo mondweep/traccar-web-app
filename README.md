@@ -97,8 +97,10 @@ cd server
 
 ## Team
 
-- Traccar Core Team: [traccar.org](https://www.traccar.org)
-- Original Authors:
+- Current Project:
+  - Mondweep Chakravorty ([LinkedIn](https://www.linkedin.com/in/mondweepchakravorty/))
+
+- Original Authors (Traccar):
   - Anton Tananaev ([anton@traccar.org](mailto:anton@traccar.org))
   - Andrey Kunitsyn ([andrey@traccar.org](mailto:andrey@traccar.org))
 
