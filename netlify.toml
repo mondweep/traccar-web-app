@@ -1,0 +1,25 @@
+[build]
+  base = "web"
+  publish = "dist"
+  command = "npm run build"
+
+[[redirects]]
+  # API Proxy: Tunnels /api requests to your Azure Backend
+  # You will update 'YOUR_AZURE_IP' after provisioning the VM.
+  from = "/api/*"
+  to = "http://20.108.17.147:8082/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  # WebSocket Proxy: Critical for real-time tracking
+  from = "/api/socket"
+  to = "ws://20.108.17.147:8082/api/socket"
+  status = 200
+  force = true
+
+[[redirects]]
+  # SPA Fallback: Ensures React Router works on refresh
+  from = "/*"
+  to = "/index.html"
+  status = 200
