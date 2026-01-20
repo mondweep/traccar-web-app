@@ -57,6 +57,14 @@ public class StreamaxProtocolDecoder extends BaseProtocolDecoder {
     @Override
     protected Object decode(Channel channel, java.net.SocketAddress remoteAddress, Object msg) throws Exception {
         ByteBuf buf = (ByteBuf) msg;
+
+        // Find the start of JSON
+        int jsonStart = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '{');
+        if (jsonStart == -1) {
+            return null;
+        }
+
+        buf.readerIndex(jsonStart);
         String data = buf.toString(StandardCharsets.UTF_8);
 
         // Parse JSON message
@@ -67,9 +75,19 @@ public class StreamaxProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        // Handle CONNECT handshake
+        if (json.has("OPERATION") && "CONNECT".equals(json.get("OPERATION").asText())) {
+            if (channel != null) {
+                String response = "{\"MODULE\":\"CERTIFICATE\",\"OPERATION\":\"CONNECT_RESPONSE\",\"PARAMETER\":{\"RESULT\":0}}";
+                channel.writeAndFlush(io.netty.buffer.Unpooled.copiedBuffer(response, StandardCharsets.UTF_8));
+            }
+        }
+
         // Extract device ID/serial number
         String deviceId = null;
-        if (json.has("id")) {
+        if (json.has("PARAMETER") && json.get("PARAMETER").has("DSNO")) {
+            deviceId = json.get("PARAMETER").get("DSNO").asText();
+        } else if (json.has("id")) {
             deviceId = json.get("id").asText();
         } else if (json.has("sn")) {
             deviceId = json.get("sn").asText();
@@ -84,6 +102,11 @@ public class StreamaxProtocolDecoder extends BaseProtocolDecoder {
         // Get or create device session
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
         if (deviceSession == null) {
+            return null;
+        }
+
+        if (json.has("OPERATION") && "CONNECT".equals(json.get("OPERATION").asText())) {
+            // Handshake only, no position data
             return null;
         }
 
@@ -124,7 +147,7 @@ public class StreamaxProtocolDecoder extends BaseProtocolDecoder {
                 position.setAccuracy(json.get("acc").asDouble());
             }
         } else {
-            position.setValid(false);
+            position.setValid(false); // Valid=false allows storing heartbeats/events without GPS
         }
 
         // Parse speed (convert from km/h to knots if necessary)
@@ -242,11 +265,11 @@ public class StreamaxProtocolDecoder extends BaseProtocolDecoder {
      */
     private boolean isStandardField(String fieldName) {
         String[] standardFields = {
-            "id", "sn", "devid", "time", "lat", "lon", "alt", "acc",
-            "speed", "heading", "dir", "mileage", "rpm", "fuel", "temp",
-            "battery", "harshAccel", "harshBrake", "harshTurn", "fatigue",
-            "phoneUse", "laneDept", "collision", "pedestrian", "recording",
-            "storage", "obd"
+                "id", "sn", "devid", "time", "lat", "lon", "alt", "acc",
+                "speed", "heading", "dir", "mileage", "rpm", "fuel", "temp",
+                "battery", "harshAccel", "harshBrake", "harshTurn", "fatigue",
+                "phoneUse", "laneDept", "collision", "pedestrian", "recording",
+                "storage", "obd"
         };
 
         for (String field : standardFields) {
