@@ -100,6 +100,9 @@ public class StreamaxProtocolDecoder extends BaseProtocolDecoder {
                 // Write JSON payload
                 response.writeBytes(jsonBytes);
 
+                // Add suffix newline
+                response.writeByte(0x0a);
+
                 channel.writeAndFlush(response);
             }
         }
