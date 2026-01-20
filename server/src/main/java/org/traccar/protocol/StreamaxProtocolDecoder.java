@@ -31,6 +31,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Protocol decoder for Streamax MDVR dashcam
@@ -48,6 +50,7 @@ import java.util.List;
  */
 public class StreamaxProtocolDecoder extends BaseProtocolDecoder {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StreamaxProtocolDecoder.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public StreamaxProtocolDecoder(StreamaxProtocol protocol) {
@@ -77,12 +80,13 @@ public class StreamaxProtocolDecoder extends BaseProtocolDecoder {
 
         // Handle CONNECT handshake
         if (json.has("OPERATION") && "CONNECT".equals(json.get("OPERATION").asText())) {
+            LOGGER.warn("Streamax: CONNECT handshake detected from " + remoteAddress);
             if (channel != null) {
                 String responseJson = "{\"MODULE\":\"CERTIFICATE\",\"OPERATION\":\"CONNECT_RESPONSE\",\"PARAMETER\":{\"RESULT\":0}}";
                 byte[] jsonBytes = responseJson.getBytes(StandardCharsets.UTF_8);
                 int length = jsonBytes.length;
 
-                ByteBuf response = io.netty.buffer.Unpooled.buffer(12 + length);
+                ByteBuf response = io.netty.buffer.Unpooled.buffer(12 + length + 1);
 
                 // Write 12-byte header
                 response.writeByte(0x08);
@@ -103,7 +107,10 @@ public class StreamaxProtocolDecoder extends BaseProtocolDecoder {
                 // Add suffix newline
                 response.writeByte(0x0a);
 
+                LOGGER.warn("Streamax: Sending response (Length: " + length + "): " + responseJson);
                 channel.writeAndFlush(response);
+            } else {
+                LOGGER.warn("Streamax: Channel is null, cannot send response!");
             }
         }
 
