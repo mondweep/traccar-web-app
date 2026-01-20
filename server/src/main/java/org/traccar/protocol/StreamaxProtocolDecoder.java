@@ -78,8 +78,29 @@ public class StreamaxProtocolDecoder extends BaseProtocolDecoder {
         // Handle CONNECT handshake
         if (json.has("OPERATION") && "CONNECT".equals(json.get("OPERATION").asText())) {
             if (channel != null) {
-                String response = "{\"MODULE\":\"CERTIFICATE\",\"OPERATION\":\"CONNECT_RESPONSE\",\"PARAMETER\":{\"RESULT\":0}}";
-                channel.writeAndFlush(io.netty.buffer.Unpooled.copiedBuffer(response, StandardCharsets.UTF_8));
+                String responseJson = "{\"MODULE\":\"CERTIFICATE\",\"OPERATION\":\"CONNECT_RESPONSE\",\"PARAMETER\":{\"RESULT\":0}}";
+                byte[] jsonBytes = responseJson.getBytes(StandardCharsets.UTF_8);
+                int length = jsonBytes.length;
+
+                ByteBuf response = io.netty.buffer.Unpooled.buffer(12 + length);
+
+                // Write 12-byte header
+                response.writeByte(0x08);
+                response.writeByte(0x00);
+                response.writeByte(0x00);
+                response.writeByte(0x00);
+
+                response.writeInt(length); // Length (4 bytes)
+
+                response.writeByte(0x52);
+                response.writeByte(0x00);
+                response.writeByte(0x00);
+                response.writeByte(0x00);
+
+                // Write JSON payload
+                response.writeBytes(jsonBytes);
+
+                channel.writeAndFlush(response);
             }
         }
 
