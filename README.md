@@ -44,6 +44,30 @@ We have customized the standard Traccar platform for our specific deployment nee
 | **Traccar Client (Phone)** | `osmand` | **5055** | `20.108.17.147` |
 | **Teltonika Tracker** | `teltonika` | **5027** | `20.108.17.147` |
 
+## Recently Solved Issues & Troubleshooting
+
+### 1. Teltonika Devices (Port 5027)
+*   **Symptom:** Device logs show `WARN: Unknown device - [ID]` and device stays Offline.
+*   **Cause:** The Traccar server caches device IDs. If you add a device in the UI *after* the device has already tried to connect, the server might not recognize it immediately.
+*   **Fix:**
+    1.  Ensure the "Identifier" in the UI exactly matches the ID in the logs.
+    2.  **Restart the Traccar Service** (`systemctl restart traccar`) to force a cache refresh.
+*   **Symptom:** Device stays offline after restart.
+*   **Fix:** Teltonika devices often sleep to save data. **Move the device** (shake or drive) to trigger the accelerometer and force a data packet.
+
+### 2. Traccar Client / Phone App (Port 5055)
+*   **Symptom:** Phone shows as "Offline" (Grey) after a server redeploy.
+*   **Cause:** Connection is one-way (Phone -> Server). The server cannot "ping" the phone. The "Online" status is reset on server restart.
+*   **Fix:** No action needed on server. Force "Send Location" from the app or wait for the user to move.
+
+### 3. Streamax Dashcams (Port 23913)
+*   **Status:** **Partial Connectivity (Debugging)**.
+*   **Progress:**
+    *   Fixed `traccar.xml` missing port configuration.
+    *   Updated `StreamaxProtocolDecoder` to handle custom JSON handshake.
+    *   Implemented binary header response to match device expectations.
+*   **Current State:** Device connects, shakes hands, but disconnects shortly after. Optimization of the keep-alive/response logic is ongoing.
+
 ## Documentation Index
 
 All detailed guides are located in the [`docs/`](./docs/) directory.
